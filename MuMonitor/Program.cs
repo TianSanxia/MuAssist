@@ -22,10 +22,8 @@ namespace MuMonitor
         static string emailPwd = string.Empty;
         static Dictionary<string, string> smtpServerDic = new Dictionary<string, string> {
                 { "163.COM", "smtp.163.com" },
-                { "QQ.COM", "smtp.qq.com" },
-                { "OUTLOOK.COM", "smtp-mail.outlook.com"},
-                { "LIVE.COM", "smtp.live.com" },
-                { "LIVE.CN", "smtp-mail.outlook.com"},
+                //{ "QQ.COM", "smtp.qq.com" },
+                { "OUTLOOK.COM", "smtp-mail.outlook.com" }
             };
 
         static void Main(string[] args)
@@ -135,38 +133,65 @@ namespace MuMonitor
 
         static void SendEmail(string message, string attachment)
         {
-            Console.WriteLine("Sending email...");
-
-            var emailParts = email.Split('@');
-            string userName = emailParts[0];
-            string emailType = emailParts[1];
-            string password = emailPwd;
-            string smtpServer = GetSMTPServerFromType(emailType);
-
-            string from = email; // "奇迹MU监控小助手";
-            string to = email;
-            DateTime sendTime = DateTime.Now;
-
-            SmtpClient client = new SmtpClient
+            try
             {
-                Port = 25,
-                DeliveryMethod = SmtpDeliveryMethod.Network,
-                UseDefaultCredentials = false,
-                Host = smtpServer,
-                Credentials = new System.Net.NetworkCredential(userName, password)
-            };
+                Console.WriteLine("Sending email...");
 
-            MailMessage mail = new MailMessage(from, to)
-            {
-                Subject = string.Format("{0} 奇迹MU 状态", sendTime.ToString("u")),
-                Body = message
-            };
+                var emailParts = email.Split('@');
+                string userName = emailParts[0];
+                string emailType = emailParts[1];
+                string password = emailPwd;
+                string smtpServer = GetSMTPServerFromType(emailType);
 
-            if (!string.IsNullOrEmpty(attachment))
-            {
-                mail.Attachments.Add(new Attachment(attachment));
+                string from = email; 
+                string to = email;
+                DateTime sendTime = DateTime.Now;
+
+                string normalizedType = emailType.Trim().ToUpper();
+
+                using (SmtpClient client = new SmtpClient
+                {
+                    DeliveryMethod = SmtpDeliveryMethod.Network,
+                    UseDefaultCredentials = false,
+                    Host = smtpServer,
+                    
+                })
+                {
+                    if(normalizedType.Equals("OUTLOOK.COM"))
+                    {
+                        client.Port = 587;
+                        client.EnableSsl = true;
+                        client.Credentials = new System.Net.NetworkCredential(email, password);
+                    }
+                    else
+                    {
+                        client.Credentials = new System.Net.NetworkCredential(userName, password);
+                    }
+
+                    using (MailMessage mail = new MailMessage(from, to)
+                    {
+                        Subject = string.Format("{0} 奇迹MU 状态", sendTime.ToString("u")),
+                        Body = message
+                    })
+                    {
+                        if (!string.IsNullOrEmpty(attachment))
+                        {
+                            mail.Attachments.Add(new Attachment(attachment));
+                        }
+                        client.Send(mail);
+
+                    }
+                }
+
+                if (attachment != null)
+                {
+                    File.Delete(attachment);
+                }
             }
-            client.Send(mail);
+            catch(Exception ex)
+            {
+                Console.WriteLine("Failed to send email: {0}, {1}", ex.Message, ex.StackTrace);
+            }
         }
 
         private static string GetSMTPServerFromType(string emailType)

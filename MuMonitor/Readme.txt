@@ -6,10 +6,7 @@ Usage:
 MuMonitor.exe EmailAddress EmailPassword [IntervalInMinutes]
 EmailAddress: email address with format email@xxx.com, only below email types are supported:
 		163.COM
-        QQ.COM"
         OUTLOOK.COM
-        LIVE.COM
-        LIVE.CN
 EmailPassword: email password
 IntervalInMinutes: Interval time to send the email.
 
