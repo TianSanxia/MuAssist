@@ -9,6 +9,8 @@ using System.Net.Mail;
 using System.Windows.Forms;
 using System.Timers;
 using System.Drawing.Imaging;
+using System.Configuration;
+using System.Management;
 
 namespace MuMonitor
 {
@@ -25,24 +27,18 @@ namespace MuMonitor
                 //{ "QQ.COM", "smtp.qq.com" },
                 { "OUTLOOK.COM", "smtp-mail.outlook.com" }
             };
+        static bool ShutdownOnDisconnected = false;
 
         static void Main(string[] args)
         {
-            if(args.Length < 2)
-            {
-                Console.WriteLine("Input email address and password!");
-                PrintUsage();
-                return;
-            }
 
-            email = args[0];
-            emailPwd = args[1];
+            email = ConfigurationManager.AppSettings["EmailAddress"];
+            emailPwd = ConfigurationManager.AppSettings["EmailPassword"];
             var emailParts = email.Split('@');
 
             if (emailParts.Length != 2)
             {
                 Console.WriteLine("Invalid email address!");
-                PrintUsage();
                 return;
             }
 
@@ -51,20 +47,15 @@ namespace MuMonitor
                 Console.WriteLine("The email type is not supported!");
                 return;
             }
-            
 
-            if (args.Length >=3)
+            captureIntervalInMins = int.Parse(ConfigurationManager.AppSettings["CheckIntervalInMins"]);
+
+            if(captureIntervalInMins < 1 )
             {
-                if(!int.TryParse(args[2], out captureIntervalInMins))
-                {
-                    captureIntervalInMins = 60;
-                }
-
-                if(captureIntervalInMins == 0)
-                {
-                    captureIntervalInMins = 1;
-                }
+                captureIntervalInMins = 1;
             }
+
+            ShutdownOnDisconnected = bool.Parse(ConfigurationManager.AppSettings["ShutdownOnDisconnected"]);
 
             //That's it! Save the image in the directory and this will work like charm. 
             try
@@ -170,7 +161,7 @@ namespace MuMonitor
 
                     using (MailMessage mail = new MailMessage(from, to)
                     {
-                        Subject = string.Format("{0} 奇迹MU 状态", sendTime.ToString("u")),
+                        Subject = message.Substring(0, message.Length > 50? 50: message.Length),
                         Body = message
                     })
                     {
@@ -222,9 +213,25 @@ namespace MuMonitor
             Console.WriteLine("Triggered on {0}", DateTime.Now.ToString("u"));
             try
             {
-                if (TakeScreenshot(fileFullName))
+                bool allDisconnected = false;
+                MuNetworkMonitor networkMonitor = new MuNetworkMonitor();
+                string status = networkMonitor.Analyze(out allDisconnected);
+
+                if (ShutdownOnDisconnected & allDisconnected)
                 {
-                    SendEmail("", fileFullName);
+                    status += " 即将关机!";
+                }
+                Console.WriteLine(status);
+
+
+                bool bScreen = TakeScreenshot(fileFullName);
+
+                SendEmail(status, bScreen ? fileFullName : null);
+
+                if(ShutdownOnDisconnected & allDisconnected)
+                {                
+                    Console.WriteLine("Shutdown ...");
+                    Shutdown();
                 }
             }
             catch(Exception ex)
@@ -236,6 +243,27 @@ namespace MuMonitor
         private static void ReportError(string error)
         {
             SendEmail(error, null);
+        }
+
+        static void Shutdown()
+        {
+            ManagementBaseObject mboShutdown = null;
+            ManagementClass mcWin32 = new ManagementClass("Win32_OperatingSystem");
+            mcWin32.Get();
+
+            // You can't shutdown without security privileges
+            mcWin32.Scope.Options.EnablePrivileges = true;
+            ManagementBaseObject mboShutdownParams =
+            mcWin32.GetMethodParameters("Win32Shutdown");
+
+            // Flag 1 means we want to shut down the system. Use "2" to reboot.
+            mboShutdownParams["Flags"] = "1";
+            mboShutdownParams["Reserved"] = "0";
+            foreach (ManagementObject manObj in mcWin32.GetInstances())
+            {
+                mboShutdown = manObj.InvokeMethod("Win32Shutdown",
+                mboShutdownParams, null);
+            }
         }
     }
 }
