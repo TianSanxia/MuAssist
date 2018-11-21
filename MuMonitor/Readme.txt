@@ -12,7 +12,7 @@ ProcessName：main, 不用修改，代表奇迹进程名
 CheckIntervalInMins：检测间隔时间（分钟),建议不少于5分钟
 EmailAddress： 你用来发送和接受状态的邮箱地址
 EmailPassword： 邮箱密码, 只会在你本地保存
-ShutdownOnDisconnected： True 或者 False, 如果是True，在检测都所有奇迹进程都不活动后，关闭电脑，请慎重设置
+ShutdownOnDisconnected： True 或者 False, 如果是True，在检测到所有奇迹进程都不活动后，关闭电脑，请慎重设置
 
 注意：
 如果机器锁屏了，抓屏图片就会是锁屏界面，所以如果特别想看到正确的奇迹抓屏，建议不要锁屏
