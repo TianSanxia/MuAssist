@@ -8,14 +8,13 @@ using System.Threading;
 
 namespace MuMonitor
 {
-    internal class MuNetworkMonitor
+    public class MuNetworkMonitor
     {
-        private string ProcessName = "main";
+        private const string ProcessName = "main";
         private int TraceDurationInMins = 1;
 
         public MuNetworkMonitor()
         {
-            ProcessName = ConfigurationManager.AppSettings["ProcessName"];
             TraceDurationInMins = 1;
         }
 
@@ -70,7 +69,7 @@ namespace MuMonitor
                 status = "掉线了";
                 online = false;
             }
-            else if (perfData.BytesSent <= 10)
+            else if (perfData.BytesSent < 10 && perfData.BytesReceived < 30)
             {
                 status = "安全区";
                 online = true;
