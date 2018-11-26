@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -65,6 +66,9 @@ namespace MuMonitor.UI
                 }
 
                 this.tbStatus.Text = "开始监测。" + NewLineChar;
+                this.tbStatus.Text += "第一次分析大概开始于"
+                    + DateTime.Now.AddMinutes(checkIntervalInMins).ToString("u")
+                    + NewLineChar;
                 this.btStartCheck.Content = "停止监测";
                 SetTimer();
             }
@@ -123,6 +127,8 @@ namespace MuMonitor.UI
                 MuNetworkMonitor networkMonitor = new MuNetworkMonitor();
                 string status = networkMonitor.Analyze(out allDisconnected);
                 string error = string.Empty;
+                string hostName = Environment.GetEnvironmentVariable("COMPUTERNAME");
+                status = string.Format(CultureInfo.InvariantCulture, "[{0}] {1}", hostName, status);
 
                 if (shutdownOnDisconnected & allDisconnected)
                 {

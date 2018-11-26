@@ -68,7 +68,7 @@ namespace MuMonitor
 
                     using (MailMessage mail = new MailMessage(from, to)
                     {
-                        Subject = message.Substring(0, message.Length > 50 ? 50 : message.Length),
+                        Subject = subject.Substring(0, subject.Length > 50 ? 50 : subject.Length),
                         Body = message
                     })
                     {
