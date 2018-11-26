@@ -15,7 +15,6 @@ namespace MuMonitor
 
         static void Main(string[] args)
         {
-
             email = ConfigurationManager.AppSettings["EmailAddress"];
             emailPwd = ConfigurationManager.AppSettings["EmailPassword"];
             var emailParts = email.Split('@');
@@ -83,8 +82,9 @@ namespace MuMonitor
             try
             {
                 bool allDisconnected = false;
-                MuNetworkMonitor networkMonitor = new MuNetworkMonitor();
-                string status = networkMonitor.Analyze(out allDisconnected);
+                string[] screenFiles;
+                MuNetworkMonitor networkMonitor = new MuNetworkMonitor(true);
+                string status = networkMonitor.Analyze(out allDisconnected, out screenFiles);
                 string error = string.Empty;
 
                 if (ShutdownOnDisconnected & allDisconnected)
@@ -94,15 +94,15 @@ namespace MuMonitor
                 Console.WriteLine(status);
 
 
-                bool bScreen = MuHelper.TakeScreenshot(fileFullName, out error);
+                //bool bScreen = MuHelper.TakeScreenshot(fileFullName, out error);
 
                 string sendError;
                 if (!MuHelper.SendEmail(
                     email,
                     emailPwd,
                     status,
-                    bScreen ? status : error,
-                    bScreen ? fileFullName : null,
+                    status,
+                    screenFiles,
                     out sendError))
                 {
                     Console.WriteLine(sendError);

@@ -36,7 +36,7 @@
         </StackPanel>
         <StackPanel HorizontalAlignment="Left"  VerticalAlignment="Top"  Orientation="Horizontal"  Margin="30,180,0,0">
             <Label Content="屏幕抓取："/>
-            <CheckBox x:Name="cbScreenshot" Margin="10,0"/>
+            <CheckBox x:Name="cbScreenshot" Margin="10,0" IsChecked="True"/>
             <TextBlock Text="*勾选后，在邮件通知中会附带屏幕图片，建议不要锁屏！" FontSize="10"/>
         </StackPanel>
         <StackPanel  VerticalAlignment="Top"  Orientation="Horizontal"  Margin="100,210,0,0" HorizontalAlignment="Left">

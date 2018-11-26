@@ -124,8 +124,9 @@ namespace MuMonitor.UI
             try
             {
                 bool allDisconnected = false;
-                MuNetworkMonitor networkMonitor = new MuNetworkMonitor();
-                string status = networkMonitor.Analyze(out allDisconnected);
+                string[] screenFiles;
+                MuNetworkMonitor networkMonitor = new MuNetworkMonitor(takeScreenshot);
+                string status = networkMonitor.Analyze(out allDisconnected, out screenFiles);
                 string error = string.Empty;
                 string hostName = Environment.GetEnvironmentVariable("COMPUTERNAME");
                 status = string.Format(CultureInfo.InvariantCulture, "[{0}] {1}", hostName, status);
@@ -135,12 +136,12 @@ namespace MuMonitor.UI
                     status += " 即将关机!";
                 }
 
-                bool bScreen = false;
+                //bool bScreen = false;
 
-                if (takeScreenshot)
-                {
-                    bScreen = MuHelper.TakeScreenshot(fileFullName, out error);
-                }
+                //if (takeScreenshot)
+                //{
+                //    bScreen = MuHelper.TakeScreenshot(fileFullName, out error);
+                //}
 
                 AppendStatus(status + NewLineChar);
 
@@ -150,8 +151,8 @@ namespace MuMonitor.UI
                     email,
                     emailPwd,
                     status,
-                    bScreen ? status : error,
-                    bScreen ? fileFullName : null,
+                    status,
+                    screenFiles,
                     out sendError))
                 {
                     AppendStatus("错误发生，请联系开发者：" + sendError + NewLineChar);
