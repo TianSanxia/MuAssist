@@ -51,6 +51,7 @@
             </ScrollViewer.Content>
         </ScrollViewer>
         <Label x:Name="lbValidation" Content="" HorizontalAlignment="Left" Margin="107,258,0,0" VerticalAlignment="Top" Foreground="#FFFF0032"/>
+        <Label Content="作者：yinuoblog@outlook.com" HorizontalAlignment="Left" Margin="30,376,0,0" VerticalAlignment="Top"/>
     </Grid>
 
 

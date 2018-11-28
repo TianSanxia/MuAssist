@@ -24,6 +24,14 @@ namespace MuMonitor
                 { "OUTLOOK.COM", "smtp-mail.outlook.com" }
             };
 
+        public static bool TestEmail(
+            string email,
+            string emailPwd,
+            out string error)
+        {
+            return SendEmail(email, emailPwd, "测试", "", null, out error);
+        }
+
         public static bool SendEmail(
             string email,
             string emailPwd,

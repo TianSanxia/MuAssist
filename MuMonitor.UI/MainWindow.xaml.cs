@@ -65,7 +65,16 @@ namespace MuMonitor.UI
                     return;
                 }
 
-                this.tbStatus.Text = "开始监测。" + NewLineChar;
+                this.tbStatus.Text = "检查邮箱有效性。" + NewLineChar;
+                string emailError;
+                if(!MuHelper.TestEmail(email, emailPwd, out emailError))
+                {
+                    this.tbStatus.Text += emailError + NewLineChar;
+                    this.lbValidation.Content = "邮箱发送不了邮件！";
+                    return;
+                }
+
+                this.tbStatus.Text += "开始监测。" + NewLineChar;
                 this.tbStatus.Text += "第一次分析大概开始于"
                     + DateTime.Now.AddMinutes(checkIntervalInMins).ToString("u")
                     + NewLineChar;
